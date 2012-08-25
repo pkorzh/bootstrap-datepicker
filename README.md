@@ -152,6 +152,35 @@ String.  Default: 'en'
 
 The two-letter code of the language to use for month and day names.  These will also be used as the input's value (and subsequently sent to the server in the case of form submissions).  Currently ships with English ('en'), German ('de'), Brazilian ('br'), and Spanish ('es') translations, but others can be added (see I18N below).  If an unknown language code is given, English will be used.
 
+### onChangeDate
+
+Function.
+
+Callback fired when date selected.
+
+### onChangeMonth
+
+Function.
+
+Callback fired when month selected.
+
+### onChangeYear
+
+Function.
+
+Callback fired when year selected.
+
+## Callbacks
+
+Each callback accept date object as parameter.
+*this* pointing to datepicker instance.
+
+    $('#datepicker').datepicker({
+        onChangeDate: function(date) {
+            var formattedDate = this.getFormattedValue();
+        }
+    });
+
 ## Markup
 
 Format a component.
@@ -220,6 +249,18 @@ Omit endDate (or provide an otherwise falsey value) to unset the limit.
 
     $('#datepicker').datepicker('setEndDate');
     $('#datepicker').datepicker('setEndDate', null);
+
+### getValue
+
+Arguments: None
+
+Returns selected date.
+
+### getFormattedValue
+
+Arguments: None
+
+Returns selected date formatted according to *format* option.
 
 ## Events
 

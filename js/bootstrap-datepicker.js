@@ -31,14 +31,17 @@
 		this.language = options.language||this.element.data('date-language')||"en";
 		this.language = this.language in dates ? this.language : "en";
 		this.format = DPGlobal.parseFormat(options.format||this.element.data('date-format')||'mm/dd/yyyy');
-		this.picker = $(DPGlobal.template)
-							.appendTo('body')
-							.on({
-								click: $.proxy(this.click, this),
-								mousedown: $.proxy(this.mousedown, this)
-							});
+		
 		this.isInput = this.element.is('input');
+		this.isDiv = this.element.is('div');
 		this.component = this.element.is('.date') ? this.element.find('.add-on') : false;
+
+		this.picker = $(DPGlobal.template).appendTo(this.isDiv ? element : 'body')
+						.on({
+							click: $.proxy(this.click, this),
+							mousedown: $.proxy(this.mousedown, this)
+						});
+
 		if(this.component && this.component.length === 0)
 			this.component = false;
 
@@ -99,6 +102,7 @@
 				break;
 		}
 
+		this.options = options;
 		this.weekStart = ((options.weekStart||this.element.data('date-weekstart')||dates[this.language].weekStart||0) % 7);
 		this.weekEnd = ((this.weekStart + 6) % 7);
 		this.startDate = -Infinity;
@@ -109,6 +113,10 @@
 		this.fillMonths();
 		this.update();
 		this.showMode();
+
+		if (this.isDiv) {
+			this.show();
+		}
 	};
 
 	Datepicker.prototype = {
@@ -116,17 +124,23 @@
 
 		show: function(e) {
 			this.picker.show();
-			this.height = this.component ? this.component.outerHeight() : this.element.outerHeight();
-			this.update();
-			this.place();
-			$(window).on('resize', $.proxy(this.place, this));
-			if (e ) {
-				e.stopPropagation();
-				e.preventDefault();
+
+			if (this.isDiv) {
+				this.update();
+			} else {
+				this.height = this.component ? this.component.outerHeight() : this.element.outerHeight();
+				this.update();
+				this.place();
+				$(window).on('resize', $.proxy(this.place, this));
+				if (e ) {
+					e.stopPropagation();
+					e.preventDefault();
+				}
+				if (!this.isInput) {
+					$(document).on('mousedown', $.proxy(this.hide, this));
+				}
 			}
-			if (!this.isInput) {
-				$(document).on('mousedown', $.proxy(this.hide, this));
-			}
+
 			this.element.trigger({
 				type: 'show',
 				date: this.date
@@ -185,6 +199,14 @@
 				this.element.prop('value', formatted);
 			}
 		},
+
+		getValue: function(){
+			return this.date;
+		},
+
+		getFormattedValue: function(){
+			return DPGlobal.formatDate(this.date, this.format, this.language);
+		}, 
 
 		setStartDate: function(startDate){
 			this.startDate = startDate||-Infinity;
@@ -400,6 +422,7 @@
 									type: 'changeMonth',
 									date: this.viewDate
 								});
+								this.options.onChangeMonth.call(this, this.viewDate);
 							} else {
 								var year = parseInt(target.text(), 10)||0;
 								this.viewDate.setUTCFullYear(year);
@@ -407,6 +430,7 @@
 									type: 'changeYear',
 									date: this.viewDate
 								});
+								this.options.onChangeYear.call(this, this.viewDate);
 							}
 							this.showMode(-1);
 							this.fill();
@@ -440,6 +464,7 @@
 								type: 'changeDate',
 								date: this.date
 							});
+							this.options.onChangeDate.call(this, this.date);
 							var element;
 							if (this.isInput) {
 								element = this.element;
@@ -623,6 +648,9 @@
 	};
 
 	$.fn.datepicker.defaults = {
+		onChangeDate: function(date){},
+		onChangeMonth: function(date){},
+		onChangeYear: function(date){}
 	};
 	$.fn.datepicker.Constructor = Datepicker;
 	var dates = $.fn.datepicker.dates = {
