@@ -84,6 +84,14 @@ Attached to non-field element, using events to work with the date values.
             $('#date-end').datepicker('hide');
         });
     });
+    
+display callendar as block element
+
+    <div id="datepicker"></div>
+    
+#####
+
+    $('#datepicker').datepicker();
 
 
 # Using bootstrap-datepicker.js
